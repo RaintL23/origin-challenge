@@ -43,16 +43,17 @@ Editar `.env` y completar al menos:
 
 ## Levantar la API
 
-Desde la **raíz del repositorio** (crea venv, instala deps y copia `.env` si falta):
+Desde la **raíz del repositorio** (levanta API + Frontend; crea venv, instala deps y copia `.env` si falta):
 
 ```bash
 python start.py
 ```
 
-Opciones útiles:
+Solo la API:
 
 ```bash
-python start.py --port 8000
+python start.py --backend-only
+python start.py --api-port 8000
 python start.py --install   # fuerza reinstalación de dependencias
 ```
 
@@ -65,13 +66,17 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - Docs OpenAPI: http://localhost:8000/docs
 - Health: http://localhost:8000/health
 
-## Usuario de prueba (seed)
+> En el navegador usá `http://localhost:8000` (o `127.0.0.1`). `0.0.0.0` es solo la interfaz de bind del servidor; en Windows suele dar `ERR_ADDRESS_INVALID`.
 
-| Usuario | Password | Display name |
-| --- | --- | --- |
-| `demo` | `demo123` | Usuario Demo |
+## Usuarios de prueba (seed)
 
-Favoritos iniciales: `TSLA`, `NFLX`.
+| Usuario | Password | Display name | Favoritos |
+| --- | --- | --- | --- |
+| `demo` | `demo123` | Usuario Demo | TSLA, NFLX, AAPL, MSFT |
+| `ana` | `ana123` | Ana Pérez | AMZN, GOOGL, META |
+| `bruno` | `bruno123` | Bruno López | NVDA, AMD, INTC |
+| `carla` | `carla123` | Carla Gómez | JPM, BAC, V |
+| `diego` | `diego123` | Diego Ruiz | DIS, NKE, KO, PEP |
 
 ## Endpoints
 
