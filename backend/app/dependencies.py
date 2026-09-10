@@ -1,36 +1,24 @@
-from functools import lru_cache
-
 from fastapi import Depends
+from psycopg_pool import ConnectionPool
 
 from app.config import Settings, get_settings
+from app.db import get_connection_pool
 from app.integrations.twelvedata import TwelveDataClient
-from app.repositories import (
-    FavoriteRepository,
-    JsonFavoriteRepository,
-    JsonStore,
-    JsonUserRepository,
-    UserRepository,
-)
+from app.repositories import FavoriteRepository, UserRepository
+from app.repositories.postgres import PostgresFavoriteRepository, PostgresUserRepository
 from app.services import AuthService, FavoriteService, StockService
 
 
-@lru_cache
-def _store_for_path(db_path: str) -> JsonStore:
-    from pathlib import Path
-
-    return JsonStore(Path(db_path))
+def get_db_pool(settings: Settings = Depends(get_settings)) -> ConnectionPool:
+    return get_connection_pool(settings)
 
 
-def get_json_store(settings: Settings = Depends(get_settings)) -> JsonStore:
-    return _store_for_path(str(settings.db_path.resolve()))
+def get_user_repo(pool: ConnectionPool = Depends(get_db_pool)) -> UserRepository:
+    return PostgresUserRepository(pool)
 
 
-def get_user_repo(store: JsonStore = Depends(get_json_store)) -> UserRepository:
-    return JsonUserRepository(store)
-
-
-def get_favorite_repo(store: JsonStore = Depends(get_json_store)) -> FavoriteRepository:
-    return JsonFavoriteRepository(store)
+def get_favorite_repo(pool: ConnectionPool = Depends(get_db_pool)) -> FavoriteRepository:
+    return PostgresFavoriteRepository(pool)
 
 
 def get_twelve_data_client(settings: Settings = Depends(get_settings)) -> TwelveDataClient:

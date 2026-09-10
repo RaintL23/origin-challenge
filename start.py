@@ -43,7 +43,11 @@ def ensure_backend_venv() -> tuple[Path, bool]:
 
 def backend_deps_installed(python: Path) -> bool:
     result = subprocess.run(
-        [str(python), "-c", "import fastapi, uvicorn, httpx, jose, bcrypt, pydantic_settings"],
+        [
+            str(python),
+            "-c",
+            "import fastapi, uvicorn, httpx, jose, bcrypt, pydantic_settings, psycopg, psycopg_pool",
+        ],
         cwd=BACKEND,
         capture_output=True,
     )
@@ -55,7 +59,18 @@ def ensure_backend_deps(python: Path, *, force: bool) -> None:
         return
     print("Instalando / actualizando dependencias del backend ...")
     subprocess.check_call(
-        [str(python), "-m", "pip", "install", "-r", str(REQUIREMENTS)],
+        [
+            str(python),
+            "-m",
+            "pip",
+            "install",
+            "--trusted-host",
+            "pypi.org",
+            "--trusted-host",
+            "files.pythonhosted.org",
+            "-r",
+            str(REQUIREMENTS),
+        ],
         cwd=BACKEND,
     )
 
@@ -169,7 +184,7 @@ def main() -> None:
         ensure_env_file(
             BACKEND_ENV,
             BACKEND_ENV_EXAMPLE,
-            "editá TWELVE_DATA_API_KEY y JWT_SECRET",
+            "editá TWELVE_DATA_API_KEY, JWT_SECRET y DATABASE_URL",
         )
 
     if run_frontend:

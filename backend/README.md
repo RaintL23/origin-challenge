@@ -5,14 +5,35 @@ API REST en **Python + FastAPI** que autentica usuarios, administra acciones pre
 ## Stack
 
 - FastAPI + Uvicorn
-- Persistencia mock: `data/db.json` (repositorios abstractos, listos para Postgres)
+- Persistencia: **PostgreSQL** (`psycopg` + pool)
 - Auth: JWT (Bearer) + bcrypt
 - Cliente HTTP async: httpx
 
 ## Requisitos
 
 - Python 3.10+
+- PostgreSQL 14+ (local)
 - API key de Twelve Data ([api.twelvedata.com](https://api.twelvedata.com/))
+
+## Base de datos
+
+1. Crear la base:
+
+```sql
+CREATE DATABASE challenge_acciones;
+```
+
+2. Cargar schema + seed:
+
+```bash
+psql -U postgres -d challenge_acciones -f data/seed_postgres.sql
+```
+
+3. (Opcional) Restaurar desde backup:
+
+```bash
+psql -U postgres -f data/challenge_acciones_backup.sql
+```
 
 ## Setup
 
@@ -36,6 +57,7 @@ cp .env.example .env
 | `JWT_SECRET` | Secreto para firmar tokens |
 | `JWT_EXPIRE_MINUTES` | Expiración del token (default `60`) |
 | `CORS_ORIGINS` | Orígenes permitidos, separados por coma |
+| `DATABASE_URL` | URL de PostgreSQL, p. ej. `postgresql://postgres:1234@127.0.0.1:5432/challenge_acciones` |
 
 ## Levantar la API
 
@@ -60,7 +82,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## Usuarios de prueba (seed)
 
-Datos en `data/db.json`:
+Datos en PostgreSQL (`data/seed_postgres.sql`):
 
 | Usuario | Password | Display name | Favoritos |
 | --- | --- | --- | --- |
@@ -70,7 +92,7 @@ Datos en `data/db.json`:
 | `carla` | `carla123` | Carla Gómez | JPM, BAC, V |
 | `diego` | `diego123` | Diego Ruiz | DIS, NKE, KO, PEP |
 
-Passwords solo como hashes bcrypt. Ese JSON es a la vez seed y backup de la BD mock.
+Passwords solo como hashes bcrypt.
 
 ## Endpoints
 
@@ -101,14 +123,15 @@ Parámetros de timeseries:
 ```
 HTTP → routers → services → repositories / Twelve Data / auth
                                 ↓
-                          data/db.json
+                           PostgreSQL
 ```
 
 | Capa | Carpeta | Rol |
 | --- | --- | --- |
 | Entrada HTTP | `app/routers/` | Rutas, status codes, Depends |
 | Reglas de negocio | `app/services/` | Validaciones, orquestación |
-| Persistencia | `app/repositories/` | ABC + impl. JSON |
+| Persistencia | `app/repositories/` | ABC + impl. PostgreSQL |
+| Pool DB | `app/db.py` | Connection pool (`psycopg_pool`) |
 | Integración externa | `app/integrations/` | Cliente Twelve Data |
 | Seguridad | `app/auth/` | JWT Bearer + bcrypt |
 | Contratos | `app/schemas/` | Pydantic request/response |
@@ -123,30 +146,22 @@ backend/
 ├── .env.example
 ├── requirements.txt
 ├── data/
-│   └── db.json                 # persistencia mock + seed + backup
+│   ├── seed_postgres.sql              # schema + seed
+│   ├── challenge_acciones_backup.sql  # backup pg_dump
+│   └── db.json                        # referencia histórica del mock
 └── app/
     ├── main.py
     ├── config.py
+    ├── db.py
     ├── dependencies.py
     ├── auth/
-    │   ├── __init__.py         # get_current_user (Bearer → user)
-    │   └── security.py         # hash/verify + encode/decode JWT
     ├── routers/
-    │   ├── auth.py
-    │   ├── favorites.py
-    │   └── stocks.py
     ├── services/
-    │   ├── auth_service.py
-    │   ├── favorite_service.py
-    │   └── stock_service.py
     ├── repositories/
-    │   └── __init__.py         # JsonStore + ABCs + repos JSON
+    │   ├── __init__.py                # ABCs (+ Json legado)
+    │   └── postgres.py                # repos PostgreSQL
     ├── integrations/
-    │   └── twelvedata.py
     └── schemas/
-        ├── auth.py
-        ├── favorites.py
-        └── stocks.py
 ```
 
 ---
@@ -157,14 +172,14 @@ backend/
 | --- | --- | --- |
 | Login + mensaje inválido | `POST /auth/login` | `routers/auth.py` → `services/auth_service.py` → `auth/security.py` |
 | Usuario autenticado | `GET /auth/me` | `routers/auth.py` + `auth/__init__.py` (`get_current_user`) |
-| Listar preferidas | `GET /favorites` | `routers/favorites.py` → `favorite_service.py` → `JsonFavoriteRepository` |
+| Listar preferidas | `GET /favorites` | `routers/favorites.py` → `favorite_service.py` → `PostgresFavoriteRepository` |
 | Agregar (símbolo, nombre, moneda) | `POST /favorites` | idem + `schemas/favorites.py` |
 | Eliminar símbolo | `DELETE /favorites/{symbol}` | idem (404 si no existe) |
 | Autocomplete / búsqueda | `GET /stocks/search?q=` | `routers/stocks.py` → `stock_service.py` → `integrations/twelvedata.py` |
 | Datos de una acción (cabecera detalle) | `GET /stocks/{symbol}` | idem |
 | Serie tiempo real / histórico | `GET /stocks/{symbol}/timeseries` | idem (`mode`, `interval`, fechas) |
-| Health check | `GET /health` | `main.py` |
-| Seed / backup | — | `data/db.json` |
+| Health check | `GET /health` | `main.py` (incluye ping a Postgres) |
+| Seed / backup | — | `data/seed_postgres.sql`, `data/challenge_acciones_backup.sql` |
 
 ---
 
@@ -173,18 +188,12 @@ backend/
 | Decisión | Por qué |
 | --- | --- |
 | **Capas routers → services → repositories** | Separar HTTP, negocio y persistencia mejora mantenibilidad y permite cambiar la BD sin reescribir endpoints (NFR del challenge). |
-| **JSON + ABCs en vez de SQL ya** | Arranque local sin Docker/motor SQL; la interfaz de repos permite migrar a PostgreSQL/SQLAlchemy sin tocar routers/services. El enunciado pide relacional; este mock cubre el flujo funcional. |
+| **PostgreSQL + ABCs** | Cumple el requisito de BD relacional; la interfaz de repos mantiene routers/services estables. |
+| **psycopg + pool (sin ORM)** | SQL explícito sobre el schema del seed; menos magia y suficiente para el alcance del challenge. |
 | **API propia como proxy a Twelve Data** | La API key queda solo en el servidor; el frontend nunca habla con Twelve Data; errores y contratos unificados. |
 | **JWT Bearer + bcrypt** | Auth stateless típica de SPA; passwords nunca en texto plano (seguridad pedida en la evaluación). |
 | **httpx async en stocks** | I/O de red no bloqueante, alineado con FastAPI. |
 | **CORS configurable** | SPA en otro origen (`localhost:5173`); permite header `Authorization`. |
-| **Search filtrado en el servidor (NYSE)** | El endpoint de listado de Twelve Data es amplio; filtrar por `q` en la API reduce payload al FE. **Trade-off:** el autocomplete solo cubre NYSE (símbolos solo NASDAQ no aparecen ahí; el detalle por símbolo sí puede resolverlos). |
+| **Search filtrado en el servidor (NYSE)** | El endpoint de listado de Twelve Data es amplio; filtrar por `q` en la API reduce payload al FE. |
 | **Realtime = rango del día calendario** | Cumple “cotización del día” sin WebSockets; el auto-refresh lo hace el frontend según el intervalo. |
-| **Escritura atómica + lock en `JsonStore`** | Evita corrupción del JSON ante escrituras concurrentes (`tmp` + `replace`). |
 | **Mensaje de login hardcodeado al enunciado** | Criterio de aceptación literal: `"usuario o clave invalida"`. |
-
-## Extender / migrar
-
-1. Implementar `UserRepository` / `FavoriteRepository` contra Postgres.
-2. Registrar la nueva impl. en `dependencies.py`.
-3. Routers y services no deberían cambiar.
