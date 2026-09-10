@@ -6,17 +6,37 @@
       "password_hash": "$2b$12$qFSxaCPJr6tlvI16ra52Z.TywRgHMRS4EWsJikjcz7F74jgWcify2",
       "display_name": "Usuario Demo",
       "created_at": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": 2,
+      "username": "ana",
+      "password_hash": "$2b$12$Rs5o6CQnCOR7hdmFkRIHvucKa4knldba8IHIe6oRsc32CkTDBpify",
+      "display_name": "Ana Pérez",
+      "created_at": "2026-01-02T00:00:00Z"
+    },
+    {
+      "id": 3,
+      "username": "bruno",
+      "password_hash": "$2b$12$jTUQR/zYh1/fP4LIjezwSOh/Yt4haHJu6E2VFxTYDwiWxO6KlFSyK",
+      "display_name": "Bruno López",
+      "created_at": "2026-01-03T00:00:00Z"
+    },
+    {
+      "id": 4,
+      "username": "carla",
+      "password_hash": "$2b$12$PO5/4WHZYzG/qiD2CVHJYeIfVFpZxlLE1FUBHraJq9Kf7iMC4OJNm",
+      "display_name": "Carla Gómez",
+      "created_at": "2026-01-04T00:00:00Z"
+    },
+    {
+      "id": 5,
+      "username": "diego",
+      "password_hash": "$2b$12$OI35oofxVj1Cz99b4d3UwuSKi4axZIqPOPivnvsO3.nNrxR7LT.R6",
+      "display_name": "Diego Ruiz",
+      "created_at": "2026-01-05T00:00:00Z"
     }
   ],
   "favorite_stocks": [
-    {
-      "id": 1,
-      "user_id": 1,
-      "symbol": "TSLA",
-      "name": "Tesla Inc",
-      "currency": "USD",
-      "created_at": "2026-01-01T00:00:00Z"
-    },
     {
       "id": 2,
       "user_id": 1,
@@ -24,6 +44,134 @@
       "name": "Netflix Inc",
       "currency": "USD",
       "created_at": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": 3,
+      "user_id": 1,
+      "symbol": "AAPL",
+      "name": "Apple Inc",
+      "currency": "USD",
+      "created_at": "2026-01-01T10:00:00Z"
+    },
+    {
+      "id": 4,
+      "user_id": 1,
+      "symbol": "MSFT",
+      "name": "Microsoft Corporation",
+      "currency": "USD",
+      "created_at": "2026-01-01T11:00:00Z"
+    },
+    {
+      "id": 5,
+      "user_id": 2,
+      "symbol": "AMZN",
+      "name": "Amazon.com Inc",
+      "currency": "USD",
+      "created_at": "2026-01-02T09:00:00Z"
+    },
+    {
+      "id": 6,
+      "user_id": 2,
+      "symbol": "GOOGL",
+      "name": "Alphabet Inc Class A",
+      "currency": "USD",
+      "created_at": "2026-01-02T09:30:00Z"
+    },
+    {
+      "id": 7,
+      "user_id": 2,
+      "symbol": "META",
+      "name": "Meta Platforms Inc",
+      "currency": "USD",
+      "created_at": "2026-01-02T10:00:00Z"
+    },
+    {
+      "id": 8,
+      "user_id": 3,
+      "symbol": "NVDA",
+      "name": "NVIDIA Corporation",
+      "currency": "USD",
+      "created_at": "2026-01-03T08:00:00Z"
+    },
+    {
+      "id": 9,
+      "user_id": 3,
+      "symbol": "AMD",
+      "name": "Advanced Micro Devices Inc",
+      "currency": "USD",
+      "created_at": "2026-01-03T08:30:00Z"
+    },
+    {
+      "id": 10,
+      "user_id": 3,
+      "symbol": "INTC",
+      "name": "Intel Corporation",
+      "currency": "USD",
+      "created_at": "2026-01-03T09:00:00Z"
+    },
+    {
+      "id": 11,
+      "user_id": 4,
+      "symbol": "JPM",
+      "name": "JPMorgan Chase & Co",
+      "currency": "USD",
+      "created_at": "2026-01-04T08:00:00Z"
+    },
+    {
+      "id": 12,
+      "user_id": 4,
+      "symbol": "BAC",
+      "name": "Bank of America Corp",
+      "currency": "USD",
+      "created_at": "2026-01-04T08:30:00Z"
+    },
+    {
+      "id": 13,
+      "user_id": 4,
+      "symbol": "V",
+      "name": "Visa Inc",
+      "currency": "USD",
+      "created_at": "2026-01-04T09:00:00Z"
+    },
+    {
+      "id": 14,
+      "user_id": 5,
+      "symbol": "DIS",
+      "name": "The Walt Disney Company",
+      "currency": "USD",
+      "created_at": "2026-01-05T08:00:00Z"
+    },
+    {
+      "id": 15,
+      "user_id": 5,
+      "symbol": "NKE",
+      "name": "Nike Inc",
+      "currency": "USD",
+      "created_at": "2026-01-05T08:30:00Z"
+    },
+    {
+      "id": 16,
+      "user_id": 5,
+      "symbol": "KO",
+      "name": "The Coca-Cola Company",
+      "currency": "USD",
+      "created_at": "2026-01-05T09:00:00Z"
+    },
+    {
+      "id": 17,
+      "user_id": 5,
+      "symbol": "PEP",
+      "name": "PepsiCo Inc",
+      "currency": "USD",
+      "created_at": "2026-01-05T09:30:00Z"
+    },
+    {
+      "id": 18,
+      "user_id": 1,
+      "symbol": "AAP",
+      "name": "Advance Auto Parts Inc.",
+      "currency": "USD",
+      "created_at": "2026-09-10T21:48:39Z"
     }
   ]
 }
